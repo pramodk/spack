@@ -23,20 +23,24 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 ##############################################################################
 from spack import *
+import re
 
 
-class Graphlib(Package):
-    """Library to create, manipulate, and export graphs Graphlib."""
-    homepage = "https://github.com/LLNL/graphlib"
-    url      = "https://github.com/LLNL/graphlib/archive/v2.0.0.tar.gz"
+class PyPy2cairo(Package):
+    """bindings for the Cairo for Python 2,
+       to be used in Python."""
 
-    version('2.0.0', '43c6df84f1d38ba5a5dce0ae19371a70')
-    version('3.0.0', '625d199f97ab1b84cbc8daabcaee5e2a')
+    homepage = "https://pypi.python.org/pypi/pycairo"
+    url      = "https://cairographics.org/releases/py2cairo-1.10.0.tar.bz2"
 
-    depends_on('cmake', type='build')
+    version('1.10.0', '20337132c4ab06c1146ad384d55372c5')
+
+    extends('python')
+    depends_on("cairo")
+    depends_on("pixman")
 
     def install(self, spec, prefix):
-        cmake(".", *std_cmake_args)
+        python('waf', 'configure', '--prefix=%s' % prefix)
+        python('waf', 'build')
+        python('waf', 'install')
 
-        make()
-        make("install")

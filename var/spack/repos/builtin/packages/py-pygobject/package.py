@@ -23,20 +23,27 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 ##############################################################################
 from spack import *
+import re
 
 
-class Graphlib(Package):
-    """Library to create, manipulate, and export graphs Graphlib."""
-    homepage = "https://github.com/LLNL/graphlib"
-    url      = "https://github.com/LLNL/graphlib/archive/v2.0.0.tar.gz"
+class PyPygobject(Package):
+    """bindings for the GLib, and GObject,
+       to be used in Python."""
 
-    version('2.0.0', '43c6df84f1d38ba5a5dce0ae19371a70')
-    version('3.0.0', '625d199f97ab1b84cbc8daabcaee5e2a')
+    homepage = "https://pypi.python.org/pypi/pygobject"
+    url      = "https://pypi.python.org/packages/6d/15/97c8b5ccca2be14cf59a2f79e15e3a82a1c3408a6b76b4107689a8b94846/pygobject-2.28.3.tar.bz2"
 
-    depends_on('cmake', type='build')
+    version('2.28.3', 'aa64900b274c4661a5c32e52922977f9')
+
+    extends('python')
+    depends_on("libffi")
+    depends_on('glib')
+    depends_on('py-py2cairo')
+    depends_on('gobject-introspection')
+
+    patch('pygobject-2.28.6-introspection-1.patch')
 
     def install(self, spec, prefix):
-        cmake(".", *std_cmake_args)
-
+        configure("--prefix=%s" % prefix)
         make()
-        make("install")
+        make("install", parallel=False)

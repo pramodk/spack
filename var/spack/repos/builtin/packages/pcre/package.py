@@ -46,6 +46,7 @@ class Pcre(Package):
         configure_args = ['--prefix=%s' % prefix]
         if '+utf' in spec:
             configure_args.append('--enable-utf')
+            configure_args.append('--enable-unicode-properties')
 
         configure(*configure_args)
         make()

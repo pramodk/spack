@@ -31,18 +31,22 @@ class Glib(Package):
        providing data structure handling for C, portability wrappers
        and interfaces for such runtime functionality as an event loop,
        threads, dynamic loading and an object system."""
+
     homepage = "https://developer.gnome.org/glib/"
     url = "http://ftp.gnome.org/pub/gnome/sources/glib/2.42/glib-2.42.1.tar.xz"
 
     version('2.42.1', '89c4119e50e767d3532158605ee9121a')
+    version('2.48.1', '67bd3b75c9f6d5587b457dc01cdcd5bb',
+            url='http://ftp.gnome.org/pub/GNOME/sources/glib/2.48/glib-2.48.1.tar.xz')
 
     depends_on("libffi")
     depends_on("zlib")
     depends_on("pkg-config", type='build')
+    depends_on("pcre")
     depends_on('gettext', when=sys.platform == 'darwin')
 
     # The following patch is needed for gcc-6.1
-    patch('g_date_strftime.patch')
+    patch('g_date_strftime.patch', when='@2.42.1')
 
     def install(self, spec, prefix):
         configure("--prefix=%s" % prefix)

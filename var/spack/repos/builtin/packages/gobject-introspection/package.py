@@ -25,18 +25,24 @@
 from spack import *
 
 
-class Graphlib(Package):
-    """Library to create, manipulate, and export graphs Graphlib."""
-    homepage = "https://github.com/LLNL/graphlib"
-    url      = "https://github.com/LLNL/graphlib/archive/v2.0.0.tar.gz"
+class GobjectIntrospection(Package):
+    """The GObject Introspection is used to describe the program APIs and
+    collect them in a uniform, machine readable format.Cairo is a 2D graphics
+    library with support for multiple output"""
 
-    version('2.0.0', '43c6df84f1d38ba5a5dce0ae19371a70')
-    version('3.0.0', '625d199f97ab1b84cbc8daabcaee5e2a')
+    homepage = "https://wiki.gnome.org/Projects/GObjectIntrospection"
+    url      = "http://ftp.gnome.org/pub/gnome/sources/gobject-introspection/1.48/gobject-introspection-1.48.0.tar.xz"
 
-    depends_on('cmake', type='build')
+    version('1.48.0', '01301fa9019667d48e927353e08bc218')
+
+    depends_on("glib")
+    depends_on("python")
+    depends_on("cairo")
 
     def install(self, spec, prefix):
-        cmake(".", *std_cmake_args)
-
+        configure("--prefix=%s" % prefix)
+        # we need to filter this file to avoid an overly long hashbang line
+        filter_file('@PYTHON@', 'python',
+                    'tools/g-ir-tool-template.in')
         make()
         make("install")

@@ -23,20 +23,25 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 ##############################################################################
 from spack import *
+import re
 
 
-class Graphlib(Package):
-    """Library to create, manipulate, and export graphs Graphlib."""
-    homepage = "https://github.com/LLNL/graphlib"
-    url      = "https://github.com/LLNL/graphlib/archive/v2.0.0.tar.gz"
+class PyPygtk(Package):
+    """bindings for the Gtk in Python"""
+    homepage = "http://www.pygtk.org/"
+    url      = "http://ftp.gnome.org/pub/GNOME/sources/pygtk/2.24/pygtk-2.24.0.tar.gz"
 
-    version('2.0.0', '43c6df84f1d38ba5a5dce0ae19371a70')
-    version('3.0.0', '625d199f97ab1b84cbc8daabcaee5e2a')
+    version('2.24.0', 'd27c7f245a9e027f6b6cd9acb7468e36')
 
-    depends_on('cmake', type='build')
+    extends('python')
+    depends_on("libffi")
+    depends_on('cairo')
+    depends_on('glib')
+    depends_on('gtkplus')
+    depends_on('py-pygobject')
+    depends_on('py-py2cairo')
 
     def install(self, spec, prefix):
-        cmake(".", *std_cmake_args)
-
+        configure("--prefix=%s" % prefix)
         make()
-        make("install")
+        make("install", parallel=False)
