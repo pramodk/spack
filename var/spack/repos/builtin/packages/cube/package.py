@@ -59,5 +59,5 @@ class Cube(Package):
             configure_args.append('--without-gui')
 
         configure(*configure_args)
-        make(parallel=False)
+        make()
         make("install", parallel=False)

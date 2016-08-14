@@ -179,6 +179,7 @@ class Qt(Package):
                   # If someone wants to get a webkit build working, be my
                   # guest!
                   '-skip', 'qtwebkit',
+                  '-skip', 'qtscript',
                   *self.common_config_args)
 
     def install(self, spec, prefix):
