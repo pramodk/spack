@@ -36,6 +36,9 @@ class Launchmon(Package):
     depends_on('autoconf', type='build')
     depends_on('automake', type='build')
     depends_on('libtool', type='build')
+    depends_on('libgcrypt', type='build')
+    depends_on('libelf', type='build')
+    depends_on('boost', type='build')
 
     def install(self, spec, prefix):
         configure(
