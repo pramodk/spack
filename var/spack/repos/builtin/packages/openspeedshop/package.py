@@ -130,7 +130,7 @@ class Openspeedshop(Package):
     depends_on("cbtf", when='+cbtf')
     depends_on("cbtf-krell", when='+cbtf')
     depends_on("cbtf-argonavis", when='+cbtf+cuda')
-    depends_on("mrnet@5.0.1:+lwthreads+krellpatch", when='+cbtf')
+    depends_on("mrnet@5.0.1+lwthreads+krellpatch", when='+cbtf')
 
     def adjustBuildTypeParams_cmakeOptions(self, spec, cmakeOptions):
         # Sets build type parameters into cmakeOptions the options that will
