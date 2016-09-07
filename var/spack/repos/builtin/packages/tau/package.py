@@ -22,24 +22,22 @@
 # License along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 ##############################################################################
-
 from spack import *
-
 import os
 import os.path
-
 from llnl.util.filesystem import join_path
 
 
 class Tau(Package):
-    """
-    A portable profiling and tracing toolkit for performance
+    """A portable profiling and tracing toolkit for performance
     analysis of parallel programs written in Fortran, C, C++, UPC,
     Java, Python.
     """
+
     homepage = "http://www.cs.uoregon.edu/research/tau"
     url      = "https://www.cs.uoregon.edu/research/tau/tau_releases/tau-2.25.tar.gz"
 
+    version('2.25.1.1', 'f2baae27c5c024937566f33339826d7c')
     version('2.25', '46cd48fa3f3c4ce0197017b3158a2b43')
     version('2.24.1', '6635ece6d1f08215b02f5d0b3c1e971b')
     version('2.24', '57ce33539c187f2e5ec68f0367c76db4')
@@ -55,6 +53,7 @@ class Tau(Package):
     variant('phase', default=True, description='Generate phase based profiles')
     variant('comm', default=True,
             description=' Generate profiles with MPI communicator info')
+    variant('ompt', default=False, description='Use OpenMP tool interface (with Intel compiler)')
 
     # TODO : Try to build direct OTF2 support? Some parts of the OTF support
     # TODO : library in TAU are non-conformant,
@@ -138,7 +137,13 @@ class Tau(Package):
         if '+comm' in spec:
             options.append('-PROFILECOMMUNICATORS')
 
-        compiler_specific_options = self.set_compiler_options(spec)
+        if '+ompt' in spec:
+            if self.compiler.name == 'intel':
+                options.append('-ompt=download')
+            else:
+                raise InstallError('OMPT supported only with Intel compiler!')
+
+        compiler_specific_options = self.set_compiler_options()
         options.extend(compiler_specific_options)
         configure(*options)
         make("install")
