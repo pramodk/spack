@@ -143,7 +143,7 @@ class Tau(Package):
             else:
                 raise InstallError('OMPT supported only with Intel compiler!')
 
-        compiler_specific_options = self.set_compiler_options()
+        compiler_specific_options = self.set_compiler_options(spec)
         options.extend(compiler_specific_options)
         configure(*options)
         make("install")
