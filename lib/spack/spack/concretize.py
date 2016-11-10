@@ -240,13 +240,13 @@ class DefaultConcretizer(object):
 
         return True   # Things changed
 
-    def _concretize_operating_system(self, spec, build_only=False):
+    def _concretize_operating_system(self, spec):
         if spec.architecture.platform_os is not None and isinstance(
                 spec.architecture.platform_os,
                 spack.architecture.OperatingSystem):
             return False
 
-        if build_only:
+        if spec.build_dep():
             spec.architecture.platform_os = \
                 spec.architecture.platform.operating_system("frontend")
         elif spec.root.architecture and spec.root.architecture.platform_os:
@@ -259,13 +259,12 @@ class DefaultConcretizer(object):
                 spec.architecture.platform.operating_system('default_os')
         return True  # changed
 
-    def _concretize_target(self, spec, build_only=False):
+    def _concretize_target(self, spec):
         if spec.architecture.target is not None and isinstance(
                 spec.architecture.target, spack.architecture.Target):
             return False
 
-        if build_only:
-            import pdb; pdb.set_trace()
+        if spec.build_dep():
             spec.architecture.target = spec.architecture.platform.target(
                 'frontend')
         elif spec.root.architecture and spec.root.architecture.target:
@@ -289,7 +288,7 @@ class DefaultConcretizer(object):
             spec.architecture.platform = spack.architecture.platform()
         return True  # changed?
 
-    def concretize_architecture(self, spec, build_only):
+    def concretize_architecture(self, spec):
         """If the spec is empty provide the defaults of the platform. If the
         architecture is not a basestring, then check if either the platform,
         target or operating system are concretized. If any of the fields are
@@ -307,8 +306,8 @@ class DefaultConcretizer(object):
 
         # Concretize the operating_system and target based of the spec
         ret = any((self._concretize_platform(spec),
-                   self._concretize_operating_system(spec, build_only),
-                   self._concretize_target(spec, build_only)))
+                   self._concretize_operating_system(spec),
+                   self._concretize_target(spec)))
         return ret
 
     def concretize_variants(self, spec):
@@ -329,7 +328,7 @@ class DefaultConcretizer(object):
                         spack.spec.VariantSpec(name, variant.default)
         return changed
 
-    def concretize_compiler(self, spec, build_only=False):
+    def concretize_compiler(self, spec):
         """If the spec already has a compiler, we're done.  If not, then take
            the compiler used for the nearest ancestor with a compiler
            spec and use that.  If the ancestor's compiler is not
@@ -368,8 +367,12 @@ class DefaultConcretizer(object):
 
         if spec.compiler:
             other_spec = spec
-        elif build_only:
-            pass
+        elif spec.build_dep():
+            link_root = spec.link_root()
+            candidates = list(
+                x for x in link_root.traverse(direction='children')
+                if x.compiler)
+            other_spec = candidates[0] if candidates else link_root
         else:
             # Find another spec that has a compiler, or the root if none do
             other_spec = find_spec(spec, lambda x: x.compiler) or spec.root
