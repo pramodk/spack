@@ -383,7 +383,7 @@ class DefaultConcretizer(object):
             # Prefer compiler info from other specs which are not build deps.
             other_spec = (
                 find_spec(spec, lambda x: x.compiler and not x.build_dep()) or
-                find_spec(spec, lambda x: x.compiler) or
+                # find_spec(spec, lambda x: x.compiler) or
                 spec.root)
 
         other_compiler = other_spec.compiler
