@@ -369,13 +369,25 @@ class DefaultConcretizer(object):
             other_spec = spec
         elif spec.build_dep():
             link_root = spec.link_root()
-            candidates = list(
-                x for x in link_root.traverse(direction='children')
-                if x.compiler)
-            other_spec = candidates[0] if candidates else link_root
+            build_subtree = list(link_root.traverse(direction='children'))
+            if (any(not x.build_dep() for x in build_subtree) and
+                    spec.root.compiler):
+                # If any member of the build subtree is linked by the root, it
+                # should use the root compiler.
+                other_spec = spec.root
+                # TODO: this actually only applies to link dependencies of the
+                # link root - build dependencies of build dependencies may be
+                # able to build with the frontend compiler
+            else:
+                candidates = list(x for x in build_subtree if x.compiler)
+                other_spec = candidates[0] if candidates else link_root
         else:
-            # Find another spec that has a compiler, or the root if none do
-            other_spec = find_spec(spec, lambda x: x.compiler) or spec.root
+            # Find another spec that has a compiler, or the root if none do.
+            # Prefer compiler info from other specs which are not build deps.
+            other_spec = (
+                find_spec(spec, lambda x: x.compiler and not x.build_dep()) or
+                find_spec(spec, lambda x: x.compiler) or
+                spec.root)
 
         other_compiler = other_spec.compiler
         assert(other_spec)
