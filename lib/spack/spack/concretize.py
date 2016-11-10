@@ -375,9 +375,6 @@ class DefaultConcretizer(object):
                 # If any member of the build subtree is linked by the root, it
                 # should use the root compiler.
                 other_spec = spec.root
-                # TODO: this actually only applies to link dependencies of the
-                # link root - build dependencies of build dependencies may be
-                # able to build with the frontend compiler
             else:
                 candidates = list(x for x in build_subtree if x.compiler)
                 other_spec = candidates[0] if candidates else link_root
