@@ -240,13 +240,16 @@ class DefaultConcretizer(object):
 
         return True   # Things changed
 
-    def _concretize_operating_system(self, spec):
+    def _concretize_operating_system(self, spec, build_only=False):
         if spec.architecture.platform_os is not None and isinstance(
                 spec.architecture.platform_os,
                 spack.architecture.OperatingSystem):
             return False
 
-        if spec.root.architecture and spec.root.architecture.platform_os:
+        if build_only:
+            spec.architecture.platform_os = \
+                spec.architecture.platform.operating_system("frontend")
+        elif spec.root.architecture and spec.root.architecture.platform_os:
             if isinstance(spec.root.architecture.platform_os,
                           spack.architecture.OperatingSystem):
                 spec.architecture.platform_os = \
@@ -256,21 +259,19 @@ class DefaultConcretizer(object):
                 spec.architecture.platform.operating_system('default_os')
         return True  # changed
 
-    #NOTES HERE
-    def _concretize_target(self, spec):
-        #IF THIS IS EXPLICITLY DEFINED THEN DONT CHANGE IT
+    def _concretize_target(self, spec, build_only=False):
         if spec.architecture.target is not None and isinstance(
                 spec.architecture.target, spack.architecture.Target):
             return False
-        #OTHERWISE IF THE ROOT IS DEFINED THEN ASSIGN THIS THE ROOT TARGET
-        if spec.root.architecture and spec.root.architecture.target:
+
+        if build_only:
+            import pdb; pdb.set_trace()
+            spec.architecture.target = spec.architecture.platform.target(
+                'frontend')
+        elif spec.root.architecture and spec.root.architecture.target:
             if isinstance(spec.root.architecture.target,
                           spack.architecture.Target):
                 spec.architecture.target = spec.root.architecture.target
-        #OTHERWISE PICK THE DEFAULT TARGET - note this doesnt take into account
-        #whether this dependency spec is a build dependency, for example, so
-        #wouldnt be able to assign the frontend, that being said we could call
-        #that *here*, i.e. if you look at Platform.target you can pass in 'fe'
         else:
             spec.architecture.target = spec.architecture.platform.target(
                 'default_target')
@@ -288,7 +289,7 @@ class DefaultConcretizer(object):
             spec.architecture.platform = spack.architecture.platform()
         return True  # changed?
 
-    def concretize_architecture(self, spec):
+    def concretize_architecture(self, spec, build_only):
         """If the spec is empty provide the defaults of the platform. If the
         architecture is not a basestring, then check if either the platform,
         target or operating system are concretized. If any of the fields are
@@ -306,8 +307,8 @@ class DefaultConcretizer(object):
 
         # Concretize the operating_system and target based of the spec
         ret = any((self._concretize_platform(spec),
-                   self._concretize_operating_system(spec),
-                   self._concretize_target(spec)))
+                   self._concretize_operating_system(spec, build_only),
+                   self._concretize_target(spec, build_only)))
         return ret
 
     def concretize_variants(self, spec):
@@ -328,7 +329,7 @@ class DefaultConcretizer(object):
                         spack.spec.VariantSpec(name, variant.default)
         return changed
 
-    def concretize_compiler(self, spec):
+    def concretize_compiler(self, spec, build_only=False):
         """If the spec already has a compiler, we're done.  If not, then take
            the compiler used for the nearest ancestor with a compiler
            spec and use that.  If the ancestor's compiler is not
@@ -365,12 +366,14 @@ class DefaultConcretizer(object):
                 spec.compiler in all_compilers):
             return False
 
-        # Find the another spec that has a compiler, or the root if none do
-        other_spec = spec if spec.compiler else find_spec(
-            spec, lambda x: x.compiler)
+        if spec.compiler:
+            other_spec = spec
+        elif build_only:
+            pass
+        else:
+            # Find another spec that has a compiler, or the root if none do
+            other_spec = find_spec(spec, lambda x: x.compiler) or spec.root
 
-        if not other_spec:
-            other_spec = spec.root
         other_compiler = other_spec.compiler
         assert(other_spec)
 

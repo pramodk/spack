@@ -1130,7 +1130,7 @@ class Spec(object):
 
         return spec
 
-    def _concretize_helper(self, presets=None, visited=None):
+    def _concretize_helper(self, presets=None, visited=None, build_only=False):
         """Recursive helper function for concretize().
            This concretizes everything bottom-up.  As things are
            concretized, they're added to the presets, and ancestors
@@ -1148,8 +1148,10 @@ class Spec(object):
 
         # Concretize deps first -- this is a bottom-up process.
         for name in sorted(self._dependencies.keys()):
-            changed |= self._dependencies[
-                name].spec._concretize_helper(presets, visited)
+            dep = self._dependencies[name]
+            build_only = not bool(dep.spec.dependents(deptype=('link',)))
+            changed |= dep.spec._concretize_helper(
+                presets, visited, build_only)
 
         if self.name in presets:
             changed |= self.constrain(presets[self.name])
@@ -1159,8 +1161,9 @@ class Spec(object):
             # still need to select a concrete package later.
             if not self.virtual:
                 changed |= any(
-                    (spack.concretizer.concretize_architecture(self),
-                     spack.concretizer.concretize_compiler(self),
+                    (spack.concretizer.concretize_architecture(
+                         self, build_only),
+                     spack.concretizer.concretize_compiler(self, build_only),
                      spack.concretizer.concretize_compiler_flags(
                          self),  # has to be concretized after compiler
                      spack.concretizer.concretize_version(self),
