@@ -256,14 +256,21 @@ class DefaultConcretizer(object):
                 spec.architecture.platform.operating_system('default_os')
         return True  # changed
 
+    #NOTES HERE
     def _concretize_target(self, spec):
+        #IF THIS IS EXPLICITLY DEFINED THEN DONT CHANGE IT
         if spec.architecture.target is not None and isinstance(
                 spec.architecture.target, spack.architecture.Target):
             return False
+        #OTHERWISE IF THE ROOT IS DEFINED THEN ASSIGN THIS THE ROOT TARGET
         if spec.root.architecture and spec.root.architecture.target:
             if isinstance(spec.root.architecture.target,
                           spack.architecture.Target):
                 spec.architecture.target = spec.root.architecture.target
+        #OTHERWISE PICK THE DEFAULT TARGET - note this doesnt take into account
+        #whether this dependency spec is a build dependency, for example, so
+        #wouldnt be able to assign the frontend, that being said we could call
+        #that *here*, i.e. if you look at Platform.target you can pass in 'fe'
         else:
             spec.architecture.target = spec.architecture.platform.target(
                 'default_target')
