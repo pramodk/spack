@@ -467,6 +467,7 @@ class DefaultConcretizer(object):
                     if flag not in spec.compiler_flags:
                         spec.compiler_flags[flag] = []
 
+        print("Concretizing compiler flags for: " + spec.name)
         # Include the compiler flag defaults from the config files
         # This ensures that spack will detect conflicts that stem from a change
         # in default compiler flags.
