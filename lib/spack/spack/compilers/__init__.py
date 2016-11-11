@@ -271,6 +271,9 @@ def compiler_for_spec(compiler_spec, arch):
     if len(compilers) < 1:
         raise NoCompilerForSpecError(compiler_spec, operating_system)
     if len(compilers) > 1:
+        print arch
+        print compilers
+        import traceback; traceback.print_stack()
         raise CompilerSpecInsufficientlySpecificError(compiler_spec)
     return compilers[0]
 

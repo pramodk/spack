@@ -935,7 +935,7 @@ class Spec(object):
 
             successors = deps
             if direction == 'parents':
-                successors = self.dependents_dict()  # TODO: deptype?
+                successors = self.dependents_dict(deptype)
 
             visited.add(key)
             for name in sorted(successors):
@@ -1130,6 +1130,16 @@ class Spec(object):
 
         return spec
 
+    def build_dep(self):
+        # If this spec is the root, it will automatically be included in
+        # traverse
+        return not (
+            self.root in self.traverse(deptype=('link',), direction='parents'))
+
+    def link_root(self):
+        parents = list(self.traverse(deptype=('link',), direction='parents'))
+        return parents[-1]
+
     def _concretize_helper(self, presets=None, visited=None):
         """Recursive helper function for concretize().
            This concretizes everything bottom-up.  As things are
@@ -1148,8 +1158,8 @@ class Spec(object):
 
         # Concretize deps first -- this is a bottom-up process.
         for name in sorted(self._dependencies.keys()):
-            changed |= self._dependencies[
-                name].spec._concretize_helper(presets, visited)
+            dep = self._dependencies[name]
+            changed |= dep.spec._concretize_helper(presets, visited)
 
         if self.name in presets:
             changed |= self.constrain(presets[self.name])

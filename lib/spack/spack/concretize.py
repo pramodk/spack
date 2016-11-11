@@ -246,7 +246,10 @@ class DefaultConcretizer(object):
                 spack.architecture.OperatingSystem):
             return False
 
-        if spec.root.architecture and spec.root.architecture.platform_os:
+        if spec.build_dep():
+            spec.architecture.platform_os = \
+                spec.architecture.platform.operating_system("frontend")
+        elif spec.root.architecture and spec.root.architecture.platform_os:
             if isinstance(spec.root.architecture.platform_os,
                           spack.architecture.OperatingSystem):
                 spec.architecture.platform_os = \
@@ -260,7 +263,11 @@ class DefaultConcretizer(object):
         if spec.architecture.target is not None and isinstance(
                 spec.architecture.target, spack.architecture.Target):
             return False
-        if spec.root.architecture and spec.root.architecture.target:
+
+        if spec.build_dep():
+            spec.architecture.target = spec.architecture.platform.target(
+                'frontend')
+        elif spec.root.architecture and spec.root.architecture.target:
             if isinstance(spec.root.architecture.target,
                           spack.architecture.Target):
                 spec.architecture.target = spec.root.architecture.target
@@ -358,12 +365,27 @@ class DefaultConcretizer(object):
                 spec.compiler in all_compilers):
             return False
 
-        # Find the another spec that has a compiler, or the root if none do
-        other_spec = spec if spec.compiler else find_spec(
-            spec, lambda x: x.compiler)
+        if spec.compiler:
+            other_spec = spec
+        elif spec.build_dep():
+            link_root = spec.link_root()
+            build_subtree = list(link_root.traverse(direction='children'))
+            if (any(not x.build_dep() for x in build_subtree) and
+                    spec.root.compiler):
+                # If any member of the build subtree is linked by the root, it
+                # should use the root compiler.
+                other_spec = spec.root
+            else:
+                candidates = list(x for x in build_subtree if x.compiler)
+                other_spec = candidates[0] if candidates else link_root
+        else:
+            # Find another spec that has a compiler, or the root if none do.
+            # Prefer compiler info from other specs which are not build deps.
+            other_spec = (
+                find_spec(spec, lambda x: x.compiler and not x.build_dep()) or
+                # find_spec(spec, lambda x: x.compiler) or
+                spec.root)
 
-        if not other_spec:
-            other_spec = spec.root
         other_compiler = other_spec.compiler
         assert(other_spec)
 
@@ -445,6 +467,7 @@ class DefaultConcretizer(object):
                     if flag not in spec.compiler_flags:
                         spec.compiler_flags[flag] = []
 
+        print("Concretizing compiler flags for: " + spec.name)
         # Include the compiler flag defaults from the config files
         # This ensures that spack will detect conflicts that stem from a change
         # in default compiler flags.
