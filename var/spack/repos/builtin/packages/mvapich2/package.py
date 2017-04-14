@@ -23,14 +23,20 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 ##############################################################################
 from spack import *
+import sys
 
 
 class Mvapich2(Package):
     """MVAPICH2 is an MPI implementation for Infiniband networks."""
     homepage = "http://mvapich.cse.ohio-state.edu/"
     url = "http://mvapich.cse.ohio-state.edu/download/mvapich/mv2/mvapich2-2.2.tar.gz"
+    list_url = "http://mvapich.cse.ohio-state.edu/downloads/"
 
-    version('2.2', '939b65ebe5b89a5bc822cdab0f31f96e')
+    # Newer alpha release
+    version('2.3a', '87c3fbf8a755b53806fa9ecb21453445')
+
+    # Prefer the latest stable release
+    version('2.2', '939b65ebe5b89a5bc822cdab0f31f96e', preferred=True)
     version('2.1', '0095ceecb19bbb7fb262131cb9c2cdd6')
     version('2.0', '9fbb68a4111a8b6338e476dc657388b4')
     version('1.9', '5dc58ed08fd3142c260b70fe297e127c')
@@ -94,7 +100,7 @@ class Mvapich2(Package):
 
     # FIXME : CUDA support is missing
     depends_on('bison')
-    depends_on('libpciaccess')
+    depends_on('libpciaccess', when=(sys.platform != 'darwin'))
 
     def url_for_version(self, version):
         base_url = "http://mvapich.cse.ohio-state.edu/download"
@@ -209,7 +215,7 @@ class Mvapich2(Package):
            self.version > Version('2.0'):
             run_env.set('SLURM_MPI_TYPE', 'pmi2')
 
-    def setup_dependent_environment(self, spack_env, run_env, extension_spec):
+    def setup_dependent_environment(self, spack_env, run_env, dependent_spec):
         spack_env.set('MPICC',  join_path(self.prefix.bin, 'mpicc'))
         spack_env.set('MPICXX', join_path(self.prefix.bin, 'mpicxx'))
         spack_env.set('MPIF77', join_path(self.prefix.bin, 'mpif77'))
@@ -221,7 +227,7 @@ class Mvapich2(Package):
         spack_env.set('MPICH_F90', spack_fc)
         spack_env.set('MPICH_FC', spack_fc)
 
-    def setup_dependent_package(self, module, dep_spec):
+    def setup_dependent_package(self, module, dependent_spec):
         self.spec.mpicc  = join_path(self.prefix.bin, 'mpicc')
         self.spec.mpicxx = join_path(self.prefix.bin, 'mpicxx')
         self.spec.mpifc  = join_path(self.prefix.bin, 'mpif90')

@@ -41,7 +41,7 @@ class Zoltan(Package):
     """
 
     homepage = "http://www.cs.sandia.gov/zoltan"
-    base_url = "http://www.cs.sandia.gov/~kddevin/Zoltan_Distributions"
+    url      = "http://www.cs.sandia.gov/~kddevin/Zoltan_Distributions/zoltan_distrib_v3.83.tar.gz"
 
     version('3.83', '1ff1bc93f91e12f2c533ddb01f2c095f')
     version('3.8', '9d8fba8a990896881b85351d4327c4a9')
@@ -100,6 +100,9 @@ class Zoltan(Package):
 
             mpi_libs = self.get_mpi_libs()
 
+            # NOTE: Some external mpi installations may have empty lib
+            # directory (e.g. bg-q). In this case we need to explicitly
+            # pass empty library name.
             if mpi_libs:
                 mpi_libs = ' -l'.join(mpi_libs)
                 config_args.append('--with-mpi-libs=-l{0}'.format(mpi_libs))

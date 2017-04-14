@@ -1006,8 +1006,7 @@ We can uninstall packages by spec using the same syntax as install.
   w33hrej libelf@0.8.13%intel
 
 
-  ==> Do you want to proceed ? [y/n]
-  y
+  ==> Do you want to proceed? [y/n] y
   ==> Successfully uninstalled libelf@0.8.13%intel@15.0.4 arch=linux-redhat6-x86_64-w33hrej
 
 
@@ -1031,7 +1030,7 @@ We can uninstall packages by spec using the same syntax as install.
 We can uninstall packages by referring only to their hash.
 
 
-We can use either ``-f`` (force) or ``-d`` (remove dependents as well) to
+We can use either ``-f`` (force) or ``-R`` (remove dependents as well) to
 remove packages that are required by another installed package.
 
 .. code-block:: console
@@ -1045,7 +1044,7 @@ remove packages that are required by another installed package.
 
 
   ==> Error: You can use spack uninstall --dependents to uninstall these dependencies as well
-  $ spack uninstall -d /4blb
+  $ spack uninstall -R /4blb
   ==> The following packages will be uninstalled :
 
   -- linux-redhat6-x86_64 / intel@16.0.3 --------------------------
@@ -1054,8 +1053,7 @@ remove packages that are required by another installed package.
   4blbe3q libelf@0.8.12%intel
 
 
-  ==> Do you want to proceed ? [y/n]
-  y
+  ==> Do you want to proceed? [y/n] y
   ==> Successfully uninstalled libdwarf@20160507%intel@16.0.3 arch=linux-redhat6-x86_64-csruprg
   ==> Successfully uninstalled libelf@0.8.12%intel@16.0.3 arch=linux-redhat6-x86_64-4blbe3q
 
@@ -1088,8 +1086,7 @@ packages at once.
   ffwrpxn trilinos@12.8.1%gcc+boost~debug+hdf5+hypre+metis+mumps~python+shared+suite-sparse+superlu-dist
 
 
-  ==> Do you want to proceed ? [y/n]
-  y
+  ==> Do you want to proceed? [y/n] y
   ==> Successfully uninstalled trilinos@12.8.1%gcc@4.4.7+boost~debug+hdf5+hypre+metis+mumps~python+shared+suite-sparse+superlu-dist arch=linux-redhat6-x86_64-ffwrpxn
 
 -----------------------------

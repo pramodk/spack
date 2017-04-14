@@ -29,7 +29,7 @@ import fcntl
 import termios
 import struct
 import traceback
-from StringIO import StringIO
+from six import StringIO
 
 from llnl.util.tty.color import *
 
@@ -59,7 +59,7 @@ def set_debug(flag):
 def set_verbose(flag):
     global _verbose
     _verbose = flag
-    
+
 
 def set_stacktrace(flag):
     global _stacktrace
@@ -83,13 +83,17 @@ def process_stacktrace(countback):
     return st_text
 
 
-def msg(message, *args):
+def msg(message, *args, **kwargs):
+    newline = kwargs.get('newline', True)
     st_text = ""
     if _stacktrace:
         st_text = process_stacktrace(2)
-    cprint("@*b{%s==>} %s" % (st_text, cescape(message)))
+    if newline:
+        cprint("@*b{%s==>} %s" % (st_text, cescape(message)))
+    else:
+        cwrite("@*b{%s==>} %s" % (st_text, cescape(message)))
     for arg in args:
-        print indent + str(arg)
+        print(indent + str(arg))
 
 
 def info(message, *args, **kwargs):
@@ -159,7 +163,8 @@ def get_number(prompt, **kwargs):
 
     number = None
     while number is None:
-        ans = raw_input(prompt)
+        msg(prompt, newline=False)
+        ans = raw_input()
         if ans == str(abort):
             return None
 
@@ -191,11 +196,12 @@ def get_yes_or_no(prompt, **kwargs):
 
     result = None
     while result is None:
-        ans = raw_input(prompt).lower()
+        msg(prompt, newline=False)
+        ans = raw_input().lower()
         if not ans:
             result = default_value
             if result is None:
-                print "Please enter yes or no."
+                print("Please enter yes or no.")
         else:
             if ans == 'y' or ans == 'yes':
                 result = True
@@ -233,7 +239,7 @@ def hline(label=None, **kwargs):
     out.write(label)
     out.write(suffix)
 
-    print out.getvalue()
+    print(out.getvalue())
 
 
 def terminal_size():

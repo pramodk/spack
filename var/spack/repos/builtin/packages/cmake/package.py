@@ -31,7 +31,7 @@ class Cmake(Package):
     homepage = 'https://www.cmake.org'
     url      = 'https://cmake.org/files/v3.4/cmake-3.4.3.tar.gz'
     list_url = 'https://cmake.org/files/'
-    list_depth = 2
+    list_depth = 1
 
     version('3.7.2',    '79bd7e65cd81ea3aa2619484ad6ff25a')
     version('3.7.1',    'd031d5a06e9f1c5367cdfc56fbd2a1c8')
@@ -63,7 +63,8 @@ class Cmake(Package):
     depends_on('qt',             when='+qt')
     depends_on('python@2.7.11:', when='+doc', type='build')
     depends_on('py-sphinx',      when='+doc', type='build')
-    depends_on('openssl',        when='+openssl')
+    depends_on("openssl", when='+openssl')
+    depends_on("openssl@:1.0.99", when='@:3.6.9+openssl')
     depends_on('ncurses',        when='+ncurses')
 
     # Cannot build with Intel, should be fixed in 3.6.2
